@@ -39,7 +39,7 @@ module OData
       protected
       
       def _parse_segment!(query, resource_path_component)
-        Object.subclasses_of(Segment).each do |segment_class|
+        Segment.descendants.each do |segment_class|
           if segment_class.can_follow?(query.segments.last)
             if segment = segment_class.parse!(query, resource_path_component)
               return segment
@@ -61,7 +61,7 @@ module OData
           value = md[1]
         end
         
-        Object.subclasses_of(Option).each do |option_class|
+        Option.descendants.each do |option_class|
           if option_class.applies_to?(query)
             if option = option_class.parse!(query, key, value)
               return option

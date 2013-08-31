@@ -1,11 +1,9 @@
-ActionController::Routing::Routes.draw do |map|
-  map.with_options(:controller => "o_data") do |o_data|
-    o_data.o_data_service  "/OData/OData.svc",                                     :action => "service"
-    o_data.o_data_metadata "/OData/OData.svc/$metadata",                           :action => "metadata"
-    o_data.o_data_resource "/OData/OData.svc/*#{ODataController.path_param.to_s}", :action => "resource"
-    
-    o_data.connect "/OData",                                     :action => "redirect_to_service"
-    o_data.connect "/OData/$metadata",                           :action => "redirect_to_metadata"
-    o_data.connect "/OData/*#{ODataController.path_param.to_s}", :action => "redirect_to_resource"
-  end
+OData::Engine.routes.draw do
+  get 'OData.svc' => "o_data#service", :as => :service, :defaults => { :format => 'xml' }
+  # this is what we want to do, but this doesn't work in Rails 4
+  #get '$metadata' => "o_data#metadata", :as => :o_data_metadata, :defaults => { :format => 'xml' }
+  # this is a workaround
+  get ':wtfrails' => "o_data#metadata", :as => :metadata, :defaults => { :format => 'xml' },
+    :constraints => {wtfrails: /\$metadata/ }
+  get 'OData.svc/*path' => "o_data#resource", :as => :resource, :defaults => { :format => 'atom' }
 end

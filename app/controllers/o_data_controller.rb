@@ -47,7 +47,7 @@ class ODataController < ApplicationController
       request.format = :xml unless request.format == :json
       
       respond_to do |format|
-        format.xml  { render :inline => "xml.instruct!; @results.empty? ? xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') { @results.each { |r| xml.uri(o_data_resource_url(r[1])) } }", :type => :builder }
+        format.xml  { render :inline => "xml.instruct!; @results.empty? ? xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') { @results.each { |r| xml.uri(o_data_engine.resource_url(r[1])) } }", :type => :builder }
         format.json { render :json => { "links" => @results.collect { |r| { "uri" => r } } }.to_json }
       end
     when OData::AbstractQuery::Segments::ValueSegment.segment_name
@@ -112,7 +112,7 @@ class ODataController < ApplicationController
   private
   
   def extract_resource_path_and_query_string
-    @resource_path = params[@@path_param].join('/')
+    @resource_path = params[:path]
     
     @query_string = params.inject({}) { |acc, pair|
       key, value = pair

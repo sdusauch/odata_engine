@@ -8,15 +8,15 @@ module ODataHelper
   def o_data_atom_feed(xml, query, results, options = {})
     results_href, results_url = begin
       if base_href = options.delete(:href)
-        [base_href.to_s, o_data_resource_url(base_href.to_s)]
+        [base_href.to_s, o_data_engine.resource_url(base_href.to_s)]
       else
-        [query.resource_path, o_data_resource_url(query.to_uri)]
+        [query.resource_path, o_data_engine.resource_url(query.to_uri)]
       end
     end
     
     results_title = options.delete(:title) || results_href
     
-    xml.tag!(:feed, { "xml:base" => o_data_service_url }.merge(options[:hide_xmlns] ? {} : @@o_data_atom_xmlns)) do
+    xml.tag!(:feed, { "xml:base" => o_data_engine.service_url }.merge(options[:hide_xmlns] ? {} : @@o_data_atom_xmlns)) do
       xml.tag!(:title, results_title)
       xml.tag!(:id, results_url)
       xml.tag!(:link, :rel => "self", :title => results_title, :href => results_href)
@@ -46,7 +46,7 @@ module ODataHelper
     raise OData::AbstractQuery::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
     
     result_href = entity_type.href_for(result)
-    result_url = o_data_resource_url(result_href)
+    result_url = o_data_engine.resource_url(result_href)
     
     result_title = entity_type.atom_title_for(result)
     result_summary = entity_type.atom_summary_for(result)
@@ -127,7 +127,7 @@ module ODataHelper
     entity_type = options[:entity_type] || query.schema.find_entity_type(:active_record => result.class)
     raise OData::AbstractQuery::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
     
-    resource_uri = o_data_resource_url(entity_type.href_for(result))
+    resource_uri = o_data_engine.resource_url(entity_type.href_for(result))
     resource_type = entity_type.qualified_name
     
     json = begin

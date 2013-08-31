@@ -12,9 +12,11 @@ module OData
       def initialize(*args)
         super(*args)
         
-        Dir.glob(RAILS_ROOT + '/app/models/*.rb').each { |file| require file }
+        Dir.glob(Rails.root.to_s + '/app/models/*.rb').each { |file| require file }
         
-        Object.subclasses_of(ActiveRecord::Base).collect { |active_record|
+        ActiveRecord::Base.descendants.reject { |active_record|
+          active_record == ActiveRecord::SchemaMigration          
+        }.collect { |active_record|
           self.EntityType(active_record, :reflect_on_associations => false)
         }.collect { |entity_type| 
           entity_type.active_record.reflect_on_all_associations.each do |reflection|

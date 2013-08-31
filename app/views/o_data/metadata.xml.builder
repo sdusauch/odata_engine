@@ -1,5 +1,5 @@
 xml.instruct!
-xml.edmx(:Edmx, :Version => "1.0", "xmlns:edmx" => "http://schemas.microsoft.com/ado/2007/06/edmx", "xml:base" => o_data_metadata_url, "xml:id" => "") do
+xml.edmx(:Edmx, :Version => "1.0", "xmlns:edmx" => "http://schemas.microsoft.com/ado/2007/06/edmx", "xml:base" => o_data_engine.metadata_url, "xml:id" => "") do
   xml.edmx(:DataServices, "m:DataServiceVersion" => "2.0", "xmlns:m" => "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata") do
     xml.tag!(:Schema, :Namespace => ODataController.schema.namespace, "xmlns:d" => "http://schemas.microsoft.com/ado/2007/08/dataservices", "xmlns" => "http://schemas.microsoft.com/ado/2007/05/edm", "xml:id" => "Schema") do
       ODataController.schema.entity_types.sort_by(&:qualified_name).each do |entity_type|
