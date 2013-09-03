@@ -6,7 +6,7 @@ require "o_data/version"
 Gem::Specification.new do |s|
   s.name = "odata_server"
   s.version = OData::VERSION
-  s.authors = ["Mark Borkum", "Brad Langhorst", "wtfiwtz", "Lawrence McAlpin"]
+  s.authors = ["Mark Borkum", "Brad Langhorst", "Nigel Sheridan-Smith", "Lawrence McAlpin"]
   s.date = "2013-08-30"
   s.email = "lmcalpin@gmail.com"
   s.homepage = ""
