@@ -1,12 +1,8 @@
 module OData
   module ActiveRecordSchema
     class Base < OData::AbstractSchema::Base
-      def find_entity_type(options = {})
-        if options[:active_record]
-          self.entity_types.find { |et| et.name == EntityType.name_for(options[:active_record]) }
-        else
-          super(options)
-        end
+      def find_entity_type(klass)
+        self.entity_types.find { |et| et.name == EntityType.name_for(klass) }
       end
       
       def initialize(*args)

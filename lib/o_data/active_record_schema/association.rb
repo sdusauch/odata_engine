@@ -74,8 +74,8 @@ module OData
       def self.from_end_options_for(schema, reflection)
         active_record = active_record_for_from_end(reflection)
         
-        entity_type = schema.find_entity_type(:active_record => active_record)
-        raise OData::AbstractQuery::Errors::EntityTypeNotFound.new(nil, active_record.class_name) if entity_type.blank?
+        entity_type = schema.find_entity_type(active_record)
+        raise OData::Core::Errors::EntityTypeNotFound.new(nil, active_record.class_name) if entity_type.blank?
         
         polymorphic = false
         
@@ -93,7 +93,7 @@ module OData
       def self.to_end_options_for(schema, reflection)
         Rails.logger.info("Processing #{reflection.active_record}")
         active_record = active_record_for_to_end(reflection)
-        entity_type = schema.find_entity_type(:active_record => active_record)
+        entity_type = schema.find_entity_type(active_record)
         
         polymorphic = reflection.options[:polymorphic] # || reflection.options[:as]
 

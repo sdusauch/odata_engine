@@ -1,12 +1,9 @@
 class ODataController < ApplicationController
-  cattr_reader :path_param
-  @@path_param = :__path__.freeze
-  
-  cattr_reader :schema
-  @@schema = OData::ActiveRecordSchema::Base.new.freeze
+  cattr_reader :data_services
+  @@data_services = OData::Edm::DataServices.new.freeze
   
   cattr_reader :parser
-  @@parser = OData::AbstractQuery::Parser.new(@@schema).freeze
+  @@parser = OData::Core::Parser.new(@@data_services).freeze
   
   rescue_from OData::ODataException, :with => :handle_exception
   rescue_from ActiveRecord::RecordNotFound, :with => :handle_exception
@@ -25,7 +22,7 @@ class ODataController < ApplicationController
   def service
     respond_to do |format|
       format.xml  # service.xml.builder
-      format.json { render :json => @@schema.to_json }
+      format.json { render :json => @@data_services.to_json }
     end
   end
   
@@ -41,30 +38,30 @@ class ODataController < ApplicationController
     @results = @query.execute!
     
     case @last_segment.class.segment_name
-    when OData::AbstractQuery::Segments::CountSegment.segment_name
+    when OData::Core::Segments::CountSegment.segment_name
       render :text => @results.to_i
-    when OData::AbstractQuery::Segments::LinksSegment.segment_name
+    when OData::Core::Segments::LinksSegment.segment_name
       request.format = :xml unless request.format == :json
       
       respond_to do |format|
         format.xml  { render :inline => "xml.instruct!; @results.empty? ? xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') { @results.each { |r| xml.uri(o_data_engine.resource_url(r[1])) } }", :type => :builder }
         format.json { render :json => { "links" => @results.collect { |r| { "uri" => r } } }.to_json }
       end
-    when OData::AbstractQuery::Segments::ValueSegment.segment_name
+    when OData::Core::Segments::ValueSegment.segment_name
       render :text => @results.to_s
-    when OData::AbstractQuery::Segments::PropertySegment.segment_name
+    when OData::Core::Segments::PropertySegment.segment_name
       request.format = :xml unless request.format == :json
       
       respond_to do |format|
         format.xml  { render :inline => "xml.instruct!; value.blank? ? xml.tag!(key.to_sym, 'm:null' => true, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:m' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.tag!(key.to_sym, value, 'edm:Type' => type, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:edm' => 'http://schemas.microsoft.com/ado/2007/05/edm')", :locals => { :key => @results.keys.first.name, :type => @results.keys.first.return_type, :value => @results.values.first }, :type => :builder }
         format.json { render :json => { @results.keys.first.name => @results.values.first }.to_json }
       end
-    when OData::AbstractQuery::Segments::NavigationPropertySegment.segment_name
+    when OData::Core::Segments::NavigationPropertySegment.segment_name
       @countable = @last_segment.countable?
       
       @navigation_property = @last_segment.navigation_property
       @polymorphic = @navigation_property.to_end.polymorphic?
-      
+
       if @polymorphic
         @entity_type = nil
         @entity_type_name = @navigation_property.to_end.name.singularize
@@ -72,11 +69,11 @@ class ODataController < ApplicationController
         @entity_type = @navigation_property.to_end.entity_type
         @entity_type_name = @entity_type.name
       end
-      
+
       @collection_name = @entity_type_name.pluralize
       
       @expand_navigation_property_paths = {}
-      if expand_option = @query.options.find { |o| o.option_name == OData::AbstractQuery::Options::ExpandOption.option_name }
+      if expand_option = @query.options.find { |o| o.option_name == OData::Core::Options::ExpandOption.option_name }
         @expand_navigation_property_paths = expand_option.navigation_property_paths
       end
       
@@ -84,7 +81,7 @@ class ODataController < ApplicationController
         format.atom # resource.atom.builder
         format.json # resource.json.erb
       end
-    when OData::AbstractQuery::Segments::CollectionSegment.segment_name
+    when OData::Core::Segments::CollectionSegment.segment_name
       @countable = @last_segment.countable?
       
       @navigation_property = nil
@@ -93,7 +90,7 @@ class ODataController < ApplicationController
       @entity_type = @last_segment.entity_type
       
       @expand_navigation_property_paths = {}
-      if expand_option = @query.options.find { |o| o.option_name == OData::AbstractQuery::Options::ExpandOption.option_name }
+      if expand_option = @query.options.find { |o| o.option_name == OData::Core::Options::ExpandOption.option_name }
         @expand_navigation_property_paths = expand_option.navigation_property_paths
       end
       
@@ -103,9 +100,9 @@ class ODataController < ApplicationController
       end
     else
       # in theory, this branch is unreachable because the <tt>parse_resource_path_and_query_string!</tt>
-      # method will throw an exception if the <tt>OData::AbstractQuery::Parser</tt> fails to match any
+      # method will throw an exception if the <tt>OData::Core::Parser</tt> fails to match any
       # segment of the resource path.
-      raise OData::AbstractQuery::Errors::AbstractQueryException.new(@query)
+      raise OData::Core::Errors::CoreException.new(@query)
     end
   end
   
@@ -116,7 +113,7 @@ class ODataController < ApplicationController
     
     @query_string = params.inject({}) { |acc, pair|
       key, value = pair
-      acc[key.to_sym] = value unless [@@path_param, :controller, :action].include?(key.to_sym)
+      acc[key.to_sym] = value unless [@resource_path, :controller, :action].include?(key.to_sym)
       acc
     }.collect { |key, value|
       key.to_s + '=' + value.to_s
@@ -128,7 +125,7 @@ class ODataController < ApplicationController
   end
   
   def set_request_format!
-    if format_option = @query.options.find { |o| o.option_name == OData::AbstractQuery::Options::FormatOption.option_name }
+    if format_option = @query.options.find { |o| o.option_name == OData::Core::Options::FormatOption.option_name }
       if format_value = format_option.value
         request.format = format_value.to_sym
       end

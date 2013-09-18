@@ -101,7 +101,7 @@ module OData
               property_or_str
             else
               property = entity_type.properties.find { |p| p.name == property_or_str.to_s }
-              raise OData::AbstractQuery::Errors::PropertyNotFound.new(nil, property_or_str) if property.blank?
+              raise OData::Core::Errors::PropertyNotFound.new(nil, property_or_str) if property.blank?
             end
           end
           

@@ -23,9 +23,10 @@ module ODataHelper
 
       unless results.empty?
         if last_result = results.last
-          if atom_updated_at = query.schema.atom_updated_at_for(last_result)
+          entity_type = options[:entity_type] || query.data_services.find_entity_type(last_result.class)
+          if atom_updated_at = entity_type.schema.atom_updated_at_for(last_result)
             xml.tag!(:updated, atom_updated_at.iso8601)
-          end
+          end unless entity_type.nil?
         end
         
         results.each do |result|
@@ -33,7 +34,7 @@ module ODataHelper
         end
       end
       
-      if inlinecount_option = query.options.find { |o| o.option_name == OData::AbstractQuery::Options::InlinecountOption.option_name }
+      if inlinecount_option = query.options.find { |o| o.option_name == OData::Core::Options::InlinecountOption.option_name }
         if inlinecount_option.value == 'allpages'
           xml.m(:count, results.length)
         end
@@ -42,8 +43,8 @@ module ODataHelper
   end
   
   def o_data_atom_entry(xml, query, result, options = {})
-    entity_type = options[:entity_type] || query.schema.find_entity_type(:active_record => result.class)
-    raise OData::AbstractQuery::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
+    entity_type = options[:entity_type] || query.data_services.find_entity_type(result.class)
+    raise OData::Core::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
     
     result_href = entity_type.href_for(result)
     result_url = o_data_engine.resource_url(result_href)
@@ -109,7 +110,7 @@ module ODataHelper
   def o_data_json_feed(query, results, options = {})
     results_json = results.collect { |result| o_data_json_entry(query, result, options.merge(:d => false, :deferred => false)) }
     
-    if inlinecount_option = query.options.find { |o| o.option_name == OData::AbstractQuery::Options::InlinecountOption.option_name }
+    if inlinecount_option = query.options.find { |o| o.option_name == OData::Core::Options::InlinecountOption.option_name }
       if inlinecount_option.value == 'allpages'
         _json = {
           "results" => results_json,
@@ -124,8 +125,8 @@ module ODataHelper
   end
   
   def o_data_json_entry(query, result, options = {})
-    entity_type = options[:entity_type] || query.schema.find_entity_type(:active_record => result.class)
-    raise OData::AbstractQuery::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
+    entity_type = options[:entity_type] || query.data_services.find_entity_type(result.class)
+    raise OData::Core::Errors::EntityTypeNotFound.new(query, result.class.name) if entity_type.blank?
     
     resource_uri = o_data_engine.resource_url(entity_type.href_for(result))
     resource_type = entity_type.qualified_name
@@ -187,7 +188,7 @@ module ODataHelper
   protected
   
   def get_selected_properties_for(query, entity_type)
-    if select_option = query.options.find { |o| o.option_name == OData::AbstractQuery::Options::SelectOption.option_name }
+    if select_option = query.options.find { |o| o.option_name == OData::Core::Options::SelectOption.option_name }
       if select_option.entity_type == entity_type
         # entity_type is the $select'ed collection/navigation property
         return select_option.properties

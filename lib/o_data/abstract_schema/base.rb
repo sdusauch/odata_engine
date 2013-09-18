@@ -6,7 +6,6 @@ module OData
 
       def initialize(namespace = "OData")
         @namespace = namespace
-
         @entity_types = []
       end
 
@@ -24,11 +23,11 @@ module OData
         @entity_types.collect(&:navigation_properties).flatten.collect(&:association).uniq
       end
       
-      def find_entity_type(options = {})
-        if options[:name]
-          self.entity_types.find { |et| et.name == options[:name].to_s }
-        else
+      def find_entity_type(name)
+        if name.nil?
           nil
+        else
+          self.entity_types.find { |et| et.name == name.to_s }
         end
       end
 

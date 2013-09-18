@@ -7,21 +7,21 @@ module OData
       
       module SchemaInstanceMethods
         def atom_title_for(one)
-          entity_type = find_entity_type(:active_record => one.class)
+          entity_type = find_entity_type(one.class)
           return nil if entity_type.blank?
           
           entity_type.atom_title_for(one)
         end
         
         def atom_summary_for(one)
-          entity_type = find_entity_type(:active_record => one.class)
+          entity_type = find_entity_type(one.class)
           return nil if entity_type.blank?
           
           entity_type.atom_summary_for(one)
         end
         
         def atom_updated_at_for(one)
-          entity_type = find_entity_type(:active_record => one.class)
+          entity_type = find_entity_type(one.class)
           return nil if entity_type.blank?
           
           entity_type.atom_updated_at_for(one)

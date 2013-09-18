@@ -7,7 +7,10 @@ module OData
 end
 
 require "o_data/abstract_schema"
-require "o_data/abstract_query"
+require "o_data/core"
 
 require "o_data/active_record_schema"
+require "o_data/in_memory_schema"
+require "o_data/edm"
+
 require "o_data/engine"
