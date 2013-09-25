@@ -67,7 +67,6 @@ module OData
 
         def execute!(acc)
           return [] if self.entity_type.blank?
-
           if key?
             self.entity_type.find_one(key_property_value)
           else

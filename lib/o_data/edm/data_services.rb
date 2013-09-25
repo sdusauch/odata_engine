@@ -8,7 +8,7 @@ module OData
       
       def initialize(schemas = @@schemas)
         @entity_types = []
-        @schemas = schemas
+        @schemas = schemas.dup || []
         schemas.each do |schema|
           @entity_types.concat(schema.entity_types)
         end

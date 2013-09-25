@@ -32,7 +32,7 @@ module OData
       end
       
       def inspect
-        "#<< #{@query.data_services.namespace.to_s}(#{self.class.segment_name}: #{self.value.inspect}) >>"
+        "#<< (#{self.class.segment_name}: #{self.value.inspect}) >>"
       end
       
       def valid?(results)

@@ -33,6 +33,10 @@ module OData
         @navigation_properties << navigation_property
         navigation_property
       end
+      
+      def find_property(property_name)
+        property = @properties.find { |p| p.name == property_name }
+      end
 
       def find_all(key_values = {})
         []
@@ -58,6 +62,12 @@ module OData
       
       def inspect
         "#<< #{qualified_name.to_s}(#{[@properties, @navigation_properties].flatten.collect { |p| "#{p.name.to_s}: #{p.return_type.to_s}" }.join(', ')}) >>"
+      end
+      
+      def filter(results, filter) 
+        results.collect do |entity|
+          filter.apply(self, entity)
+        end.compact
       end
     end
   end

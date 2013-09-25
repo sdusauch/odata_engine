@@ -73,8 +73,7 @@ module OData
         _segments = [@segments].flatten.compact
         results = __execute!([], nil, _segments.shift, _segments)
         
-        results = with_skip_and_top_options(with_orderby_option(results))
-        
+        results = with_filter_options(with_skip_and_top_options(with_orderby_option(results)))
         results
       end
       
@@ -90,6 +89,15 @@ module OData
       end
       
       private
+      
+      def with_filter_options(results)
+        filter_option = @options.find { |o| o.option_name == Options::FilterOption.option_name }
+        if filter_option && (entity_type = filter_option.entity_type)
+          results = entity_type.filter(results, filter_option)
+        else
+          results
+        end
+      end
       
       def with_orderby_option(results)
         orderby_option = @options.find { |o| o.option_name == Options::OrderbyOption.option_name }

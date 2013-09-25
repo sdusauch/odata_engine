@@ -26,9 +26,25 @@ module OData
         end
       end
       
+      class FilterTooComplicatedException < CoreException
+        def initialize(query)
+          super(query)
+        end
+        
+        def to_s
+          "This OData producer can not yet handle your filter: #{@query}'."
+        end
+      end
+      
       class EntityTypeNotFound < ParseQuerySegmentException
         def to_s
           "EntityType not found for the segment '#{self.str.to_s}'"
+        end
+      end
+      
+      class EntityTypeAlreadyRegistered < CoreException
+        def to_s
+          "EntityType '#{self.str.to_s}' is already registered"
         end
       end
       

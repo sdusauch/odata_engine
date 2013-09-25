@@ -6,6 +6,7 @@ module OData
   end
 end
 
+require 'active_support/core_ext'
 require "o_data/abstract_schema"
 require "o_data/core"
 

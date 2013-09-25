@@ -20,7 +20,7 @@ module OData
       end
 
       def value_for(one)
-        nil
+        one.send(@name)
       end
       
       def qualified_name

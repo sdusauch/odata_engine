@@ -18,7 +18,7 @@ module OData
       end
       
       def inspect
-        "#<< #{@query.data_services.namespace.to_s}(#{@key.to_s}=#{@value.to_s}) >>"
+        "#<< (#{@key.to_s}=#{@value.to_s}) >>"
       end
     end
     

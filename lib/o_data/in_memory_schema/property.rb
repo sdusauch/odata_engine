@@ -19,10 +19,6 @@ module OData
         !!@nullable
       end
 
-      def value_for(one)
-        one.send(@name)
-      end
-      
       def qualified_name
         @entity_type.qualified_name.to_s + '#' + self.name
       end
