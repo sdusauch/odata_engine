@@ -16,7 +16,7 @@ module OData
           false
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           return [] if @entity_type.blank?
 
           @entity_type.find_all

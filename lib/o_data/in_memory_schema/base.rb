@@ -6,7 +6,6 @@ module OData
       def initialize(namespace = "OData", options = {})
         super(namespace)
         @classes = options[:classes] || []
-        super(namespace)
         self.register(classes)
       end
 
@@ -19,7 +18,7 @@ module OData
           if (find_entity_type(cls))
             raise OData::Core::Errors::EntityTypeAlreadyRegistered.new(cls.name)
           end
-          self.EntityType(cls, :reflect_on_associations => false, :key => key)
+            self.EntityType(cls, :reflect_on_associations => false, :key => key)
         end
       end
       

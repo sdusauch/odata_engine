@@ -68,7 +68,7 @@ module OData
         navigation_property
       end
 
-      def find_all(key_values = {})
+      def find_all(key_values = {}, options = nil)
         if @active_record.respond_to?(:with_permissions_to)
           @active_record.with_permissions_to(:read).find(:all, :conditions => conditions_for_find(key_values))
         else

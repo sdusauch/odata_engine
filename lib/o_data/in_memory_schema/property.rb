@@ -14,17 +14,13 @@ module OData
         @return_type = 'Edm.String'
         @nullable = nullable
       end
-
-      def nullable?
-        !!@nullable
-      end
-
-      def qualified_name
-        @entity_type.qualified_name.to_s + '#' + self.name
-      end
       
-      def inspect
-        "#<< {qualified_name.to_s}(return_type: #{@return_type.to_s}, nullable: #{nullable?}) >>"
+      def value_for(one)
+        if (entity_type.respond_to?(:stringify)) then
+          entity_type.stringify(@name, one.send(@name))
+        else
+          one.send(@name)
+        end
       end
     end
   end

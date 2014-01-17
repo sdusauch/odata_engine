@@ -1,6 +1,10 @@
 module OData
   module Core
     module Options
+      def self.filters(options)
+        options.find { |o| o.option_name == OData::Core::Options::FilterOption.option_name }
+      end
+      
       class BinaryTree
         attr_reader :left, :value, :right
         
@@ -100,7 +104,25 @@ module OData
           entity
         end
         
+        def find_filter(prop)
+          token = @filter
+          find_filter_from_token(prop, token)
+        end
+        
 private
+        def find_filter_from_token(prop, token)
+          return nil if token.nil?
+          return nil if token.left.nil?
+          return nil if token.right.nil? 
+          if token.left.value.to_sym == prop
+            return FilterExpression.new(prop, token.value, token.right.value) 
+          end
+          left_val = find_filter_from_token(prop, token.left)
+          right_val = find_filter_from_token(prop, token.right)
+          return left_val unless left_val.nil?
+          return right_val
+        end
+        
         def eval_token(entity_type, entity, token)
           return nil if token.nil? 
           val = token.value
@@ -120,7 +142,6 @@ private
           else
             eval_property_or_literal(entity_type, entity, val)
           end
-          #puts "#{left_val} #{val} #{right_val} = #{ret}"
           ret
         end
         
@@ -142,7 +163,8 @@ private
         end
         
         def self.tokenize_filter_query(filter_query)
-          tokens = filter_query.split(/(\()|(\))|([0-9]*\.+[0-9]*)|('\w*')|(\w*)/).compact.keep_if { |x| x.strip.length > 0 }
+          tokens = filter_query.split(/(\S*)/).compact.keep_if { |x| x.strip.length > 0 }
+          tokens
         end
         
         # group tokens that are parenthesized

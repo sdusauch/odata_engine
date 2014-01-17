@@ -27,7 +27,7 @@ module OData
         self.class.can_follow?(anOtherSegment)
       end
       
-      def execute!(acc)
+      def execute!(acc, options = nil)
         acc
       end
       

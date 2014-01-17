@@ -30,7 +30,7 @@ module OData
           end
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           [acc].flatten.compact.collect { |one|
             if entity_type = self.query.data_services.entity_types.find { |et| et.name == one.class.name }
               [one, entity_type.plural_name + '(' + entity_type.primary_key_for(one).to_s + ')']

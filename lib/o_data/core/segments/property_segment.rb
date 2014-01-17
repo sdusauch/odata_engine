@@ -33,7 +33,7 @@ module OData
           false
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           # [acc].flatten.compact.collect { |one|
           #   [one, @property.value_for(one)]
           # }

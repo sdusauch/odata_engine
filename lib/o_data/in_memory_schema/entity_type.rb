@@ -13,13 +13,17 @@ module OData
 
         key_property_name = options[:key]
         cls_properties = cls.instance_methods - Object.instance_methods
-        cls_properties.each do |prop|
+        cls_properties.map { |prop| if cls.instance_method(prop).arity == 0 then prop else nil end }.compact.each do |prop|
           p = self.Property(prop.to_s)
           @key_property = p if key_property_name.to_s == prop.to_s
           p
         end
-        object_id_property = self.Property('object_id')
-        @key_property ||= object_id_property
+        # if we aren't given a key, use the object id - this is almost always terrible, but we need to use
+        # *something* to identify our objects
+        if key_property_name.nil? then
+          object_id_property = self.Property('object_id')
+          @key_property ||= object_id_property
+        end
         @navigation_properties = []
         @entities = options[:entities] || []
       end
@@ -36,7 +40,7 @@ module OData
         navigation_property
       end
 
-      def find_all(key_values = {})
+      def find_all(key_values = {}, options = nil)
         @entities
       end
       

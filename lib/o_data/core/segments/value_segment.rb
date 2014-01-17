@@ -24,7 +24,7 @@ module OData
           end
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           # acc
           acc.values.first
         end

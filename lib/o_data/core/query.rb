@@ -80,8 +80,7 @@ module OData
       def __execute!(seen, acc, head, rest)
         return acc if head.blank?
         raise Errors::InvalidSegmentContext.new(self, head) unless seen.empty? || head.can_follow?(seen.last)
-        
-        results = head.execute!(acc)
+        results = head.execute!(acc, @options)
         raise Errors::ExecutionOfSegmentFailedValidation.new(self, head) unless head.valid?(results)
 
         seen << head

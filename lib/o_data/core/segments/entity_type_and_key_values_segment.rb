@@ -65,12 +65,12 @@ module OData
           !key?
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           return [] if self.entity_type.blank?
           if key?
             self.entity_type.find_one(key_property_value)
           else
-            self.entity_type.find_all(@key_values)
+            self.entity_type.find_all(@key_values, options)
           end
         end
 

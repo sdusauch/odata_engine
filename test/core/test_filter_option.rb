@@ -4,6 +4,11 @@ class TestFilterOption < Test::Unit::TestCase
   def test_tokenize_handles_integer_literals
     tokens = OData::Core::Options::FilterOption.tokenize_filter_query("Prop eq 55")
     assert_equal(3, tokens.length)
+    assert_equal("55", tokens[2])
+    # handle negative number
+    tokens = OData::Core::Options::FilterOption.tokenize_filter_query("Prop eq -55")
+    assert_equal(3, tokens.length)
+    assert_equal("-55", tokens[2])
   end
 
   def test_tokenize_handles_decimal_literals
@@ -42,6 +47,24 @@ class TestFilterOption < Test::Unit::TestCase
     assert_equal(5, tree.left.size, "left-hand side should have only one node")
     assert_equal(:and, tree.value, "wrong value for root")
     assert_equal(:eq, tree.right.value, "wrong value for root")
+  end
+  
+  def test_find_filter
+    schema = OData::AbstractSchema::Base.new
+    ds = OData::Edm::DataServices.new([schema])
+    entity_type = schema.EntityType("Foo")
+    bar = entity_type.Property("bar", 'Edm.Int32', false)
+    entity_type.Property("baz", 'Edm.Int32', false)
+    entity_type.key_property = bar 
+    query = OData::Core::Parser.new(ds).parse!("Foos")
+    filter = "bar add 5 eq 8 or baz eq 3"
+    # head should be :or
+    filter_option = OData::Core::Options::FilterOption.new(query, filter)
+    expr = filter_option.find_filter(:baz)
+    assert_not_nil(expr)
+    assert_equal('3', expr.value)
+    assert_equal(:baz, expr.property)
+    assert_equal(:eq, expr.operator)
   end
   
   def test_apply_filter

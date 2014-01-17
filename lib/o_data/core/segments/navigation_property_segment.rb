@@ -53,7 +53,7 @@ module OData
           multiple? && super
         end
 
-        def execute!(acc)
+        def execute!(acc, options = nil)
           [acc].flatten.compact.collect { |one|
             if key?
               @navigation_property.find_one(one, key_property_value)

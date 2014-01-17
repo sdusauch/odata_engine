@@ -38,7 +38,7 @@ module OData
         property = @properties.find { |p| p.name == property_name }
       end
 
-      def find_all(key_values = {})
+      def find_all(key_values = {}, options = nil)
         []
       end
       
