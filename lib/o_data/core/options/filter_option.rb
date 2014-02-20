@@ -2,7 +2,7 @@ module OData
   module Core
     module Options
       def self.filters(options)
-        options.find { |o| o.option_name == OData::Core::Options::FilterOption.option_name }
+        options.find { |o| o.option_name == OData::Core::Options::FilterOption.option_name } unless options.nil?
       end
       
       class BinaryTree
