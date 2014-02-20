@@ -130,9 +130,9 @@ private
           right_val = eval_token(entity_type, entity, token.right)
           ret = case val
           when :eq
-            left_val == right_val
+            left_val.to_s == right_val.to_s
           when :ne
-            left_val != right_val
+            left_val.to_s != right_val.to_s
           when :and
             left_val && right_val
           when :or
