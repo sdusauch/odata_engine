@@ -62,7 +62,7 @@ module OData
         CONJUNCTIONS = %w(and or)
         NEGATION = %w(not)
         ARITHMETIC_OPERATORS = %w(add sub mul div mod)
-        PRECEDENCE = (LOGICAL_OPERATORS | CONJUNCTIONS | NEGATION | ARITHMETIC_OPERATORS).reverse
+        PRECEDENCE = (LOGICAL_OPERATORS | CONJUNCTIONS | NEGATION | ARITHMETIC_OPERATORS)
 
         attr_reader :filter
         
@@ -106,21 +106,19 @@ module OData
         
         def find_filter(prop)
           token = @filter
-          find_filter_from_token(prop, token)
+          found_filters = []
+          find_filter_from_token(prop, token, found_filters)
+          found_filters
         end
         
 private
-        def find_filter_from_token(prop, token)
-          return nil if token.nil?
-          return nil if token.left.nil?
-          return nil if token.right.nil? 
-          if token.left.value.to_sym == prop
-            return FilterExpression.new(prop, token.value, token.right.value) 
+        def find_filter_from_token(prop, token, found_filters)
+          return if token.nil?
+          if token.left != nil && token.left.value.to_sym == prop
+            found_filters << FilterExpression.new(prop, token.value, token.right.value)
           end
-          left_val = find_filter_from_token(prop, token.left)
-          right_val = find_filter_from_token(prop, token.right)
-          return left_val unless left_val.nil?
-          return right_val
+          find_filter_from_token(prop, token.left, found_filters)
+          find_filter_from_token(prop, token.right, found_filters)
         end
         
         def eval_token(entity_type, entity, token)
@@ -167,33 +165,6 @@ private
           tokens
         end
         
-        # group tokens that are parenthesized
-        # def self.group_tokens(tokens)
-          # token_subgroup = []
-          # paren_count = 0
-          # grouped_tokens = []
-          # in_paren = false
-          # tokens.each do |token|
-            # if token == '(' then
-              # token_subgroup = []
-              # in_paren = true
-              # paren_count += 1
-              # found_paren = true
-            # elsif token == ')' then
-              # paren_count -= 1
-              # if paren_count == 0 then 
-                # in_paren = false
-                # grouped_tokens << GroupExpression.new(self.group_tokens(token_subgroup))
-              # end
-            # elsif in_paren then
-              # token_subgroup << token
-            # else
-              # grouped_tokens << token
-            # end
-          # end
-          # grouped_tokens
-        # end
-
         def self.tree_tokens(tokens)
           highest_precedence = -1
           operator, left, right = nil
@@ -212,7 +183,7 @@ private
               end
             end
           end
-          if LOGICAL_OPERATORS.include?(operator) then
+          if LOGICAL_OPERATORS.include?(operator) or ARITHMETIC_OPERATORS.include?(operator) then
             this_expr = BinaryTree.new(operator.to_sym, tree_tokens(left), BinaryTree.new(right[0], nil, nil))
             if (right.size >= 2)
               BinaryTree.new(right[1].to_sym, this_expr, tree_tokens(right[2, right.size]))

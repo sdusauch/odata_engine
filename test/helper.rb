@@ -4,6 +4,7 @@ ENV["RAILS_ENV"] ||= "test"
 require 'rails'
 require 'rails/test_help'
 require 'test/unit'
+require 'byebug'
 
 def MiniTest.filter_backtrace(bt)
   bt

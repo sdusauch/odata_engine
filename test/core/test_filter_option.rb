@@ -44,9 +44,21 @@ class TestFilterOption < Test::Unit::TestCase
     tokens = OData::Core::Options::FilterOption.tokenize_filter_query("a or c eq d and e eq f")
     tree = OData::Core::Options::FilterOption.tree_tokens(tokens)
     assert_equal(9, tree.size, "incorrect size for token tree")
-    assert_equal(5, tree.left.size, "left-hand side should have only one node")
-    assert_equal(:and, tree.value, "wrong value for root")
-    assert_equal(:eq, tree.right.value, "wrong value for root")
+    assert_equal(1, tree.left.size, "left-hand side should have only one node")
+    assert_equal(:or, tree.value, "wrong value for root")
+    assert_equal(:and, tree.right.value, "wrong value for right")
+  end
+  
+  def test_tree_tokens2
+    # eq has highest precedence, followed by and, then finally or
+    tokens = OData::Core::Options::FilterOption.tokenize_filter_query("baz lt 3 or baz gt 4")
+    tree = OData::Core::Options::FilterOption.tree_tokens(tokens)
+    assert_equal(7, tree.size, "incorrect size for token tree")
+    assert_equal(3, tree.left.size, "left-hand side should have only one node")
+    assert_equal(3, tree.right.size, "left-hand side should have only one node")
+    assert_equal(:or, tree.value, "wrong value for root")
+    assert_equal(:lt, tree.left.value, "wrong value for left")
+    assert_equal(:gt, tree.right.value, "wrong value for right")
   end
   
   def test_find_filter
@@ -62,9 +74,31 @@ class TestFilterOption < Test::Unit::TestCase
     filter_option = OData::Core::Options::FilterOption.new(query, filter)
     expr = filter_option.find_filter(:baz)
     assert_not_nil(expr)
-    assert_equal('3', expr.value)
-    assert_equal(:baz, expr.property)
-    assert_equal(:eq, expr.operator)
+    assert_equal('3', expr[0].value)
+    assert_equal(:baz, expr[0].property)
+    assert_equal(:eq, expr[0].operator)
+  end
+  
+  def test_find_filters
+    schema = OData::AbstractSchema::Base.new
+    ds = OData::Edm::DataServices.new([schema])
+    entity_type = schema.EntityType("Foo")
+    bar = entity_type.Property("bar", 'Edm.Int32', false)
+    entity_type.Property("baz", 'Edm.Int32', false)
+    entity_type.key_property = bar 
+    query = OData::Core::Parser.new(ds).parse!("Foos")
+    filter = "baz lt 3 or baz gt 4"
+    # head should be :or
+    filter_option = OData::Core::Options::FilterOption.new(query, filter)
+    expr = filter_option.find_filter(:baz)
+    assert_not_nil(expr)
+    assert_equal(2, expr.size)
+    assert_equal('3', expr[0].value)
+    assert_equal(:baz, expr[0].property)
+    assert_equal(:lt, expr[0].operator)
+    assert_equal('4', expr[1].value)
+    assert_equal(:baz, expr[1].property)
+    assert_equal(:gt, expr[1].operator)
   end
   
   def test_apply_filter
@@ -78,10 +112,10 @@ class TestFilterOption < Test::Unit::TestCase
     filter = "bar add 5 eq 8 or baz eq 3"
     # head should be :or
     filter_option = OData::Core::Options::FilterOption.new(query, filter)
-    assert_equal(:or, filter_option.filter.value)
-    assert_equal(:eq, filter_option.filter.right.value)
-    assert_equal('baz', filter_option.filter.right.left.value)
-    assert_equal('3', filter_option.filter.right.right.value)
+    assert_equal(:eq, filter_option.filter.value)
+    assert_equal(:or, filter_option.filter.right.value)
+    assert_equal('8', filter_option.filter.right.left.value)
+    assert_equal(:eq, filter_option.filter.right.right.value)
     entity = Test::Foo.new(1, 2, 4)
     res = filter_option.apply(entity_type, entity)
     assert(!res)
