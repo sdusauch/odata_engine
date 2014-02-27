@@ -52,7 +52,6 @@ module OData
         def initialize(prop, op, value)
           @property = prop
           @operator = op
-          #@property = entity_type.properties.find { |p| p.name == prop.to_s }
           @value = value
         end
       end
@@ -115,7 +114,7 @@ private
         def find_filter_from_token(prop, token, found_filters)
           return if token.nil?
           if token.left != nil && token.left.value.to_sym == prop
-            found_filters << FilterExpression.new(prop, token.value, token.right.value)
+            found_filters << FilterExpression.new(prop, token.value, eval_literal(token.right.value))
           end
           find_filter_from_token(prop, token.left, found_filters)
           find_filter_from_token(prop, token.right, found_filters)
@@ -147,6 +146,10 @@ private
           if prop = entity_type.find_property(val) then
             return prop.value_for(entity)
           end
+          eval_literal(val)
+        end
+        
+        def eval_literal(val)
           if val.start_with?("'") and val.end_with?("'") then
             # strip quotes off of the string literal
             return val[1, val.size - 2]
