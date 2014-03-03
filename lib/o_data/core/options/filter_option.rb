@@ -130,6 +130,14 @@ private
             left_val.to_s == right_val.to_s
           when :ne
             left_val.to_s != right_val.to_s
+          when :gt
+            left_val > right_val
+          when :lt
+            left_val < right_val
+          when :ge
+            left_val >= right_val
+          when :le
+            left_val <= right_val
           when :and
             left_val && right_val
           when :or
