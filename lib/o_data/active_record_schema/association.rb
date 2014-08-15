@@ -39,7 +39,7 @@ module OData
         
         case reflection.macro
         when :belongs_to
-          out << reflection.primary_key_name
+          out << reflection.foreign_key
           out << reflection.options[:foreign_type] if reflection.options[:polymorphic]
         else
           out << EntityType.primary_key_for(reflection.active_record)
@@ -61,7 +61,7 @@ module OData
             out << EntityType.primary_key_for(reflection.class_name.constantize)
           end
         else
-          out << reflection.primary_key_name
+          out << reflection.foreign_key
           
           if reflection.options[:as]
             out << reflection.options[:as].to_s + '_type'
