@@ -1,24 +1,5 @@
-=== OData Server
+=== OData Engine
 
-This is a rails plugin/engine to embue your application with OData features (so its data can be readily 
-consumed by an OData client).
+This is a Rails Engine that enables exposing available Active Record models through an OData service endpoint.
 
-In OData, a service exposes a number of workspace.  Each workspace is backed by a schema and contains 
-a collection of entity collections.  An entity collection is a related set of records. 
-
-Configure the plugin by adding a number of schema objects to OData::Edm::DataServices.schemas.  Each 
-schema is an instance of a subclass of OData::AbstractSchema::Base.  We currently only support two
-implementations, and the specific implementation determines how to load the records, mapping the 
-records' properties to/from Edm data types, and handling filtering, sorting, and data retrieval.
-
-- OData::ActiveRecordSchema::Base -- this iterates over your models exposing each as OData entities 
-
-and
-
-- OData::InMemorySchema::Base -- this takes in a list of objects which are exposed as OData entities
-
-This code is not heavily tested.  It is alpha quality at best.   Expect the API to change drastically over
-time.  
-
-See https://github.com/lmcalpin/odata_provider_example_rb for an example application that
-uses this gem.
+The code is (heavily) based on the OdataOnRails plugin by Mark Borkum and is a work in progress.
