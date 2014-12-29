@@ -18,6 +18,10 @@ module OData
         def self.can_follow?(anOtherSegment)
           anOtherSegment.blank?
         end
+
+        def valid?(results)
+          !results.blank?
+        end
       end # CollectionSegment
     end # Segments
   end # Core

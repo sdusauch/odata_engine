@@ -8,7 +8,7 @@ module OData
       def initialize(*args)
         super(*args)
         
-#        Dir.glob(Rails.root.to_s + '/app/models/*.rb').each { |file| require file }
+        Dir.glob(Rails.root.to_s + '/app/models/*.rb').each { |file| require file }
         
         ActiveRecord::Base.descendants.reject { |active_record|
           active_record == ActiveRecord::SchemaMigration          
