@@ -15,7 +15,7 @@ module OData
       def initialize(schema, active_record, options = {})
         super(schema, self.class.name_for(active_record))
         
-        options.reverse_merge!(:reflect_on_associations => true)
+        options.reverse_merge!(reflect_on_associations: true)
         
         @active_record = active_record
 

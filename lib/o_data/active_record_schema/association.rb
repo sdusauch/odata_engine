@@ -87,7 +87,7 @@ module OData
         name = entity_type.name
         name = name.pluralize if multiple
         
-        { :name => name, :entity_type => entity_type, :return_type => entity_type.qualified_name, :multiple => multiple, :nullable => nullable, :polymorphic => polymorphic }
+        { name: name, entity_type: entity_type, return_type: entity_type.qualified_name, multiple: multiple, nullable: nullable, polymorphic: polymorphic }
       end
       
       def self.to_end_options_for(schema, reflection)
@@ -112,9 +112,9 @@ module OData
         name = name.pluralize if multiple
         
         unless active_record.blank? || entity_type.blank?
-          { :name => name, :entity_type => entity_type, :return_type => entity_type.qualified_name, :multiple => multiple, :nullable => nullable, :polymorphic => polymorphic }
+          { name: name, entity_type: entity_type, return_type: entity_type.qualified_name, multiple: multiple, nullable: nullable, polymorphic: polymorphic }
         else
-          { :name => name, :return_type => self.polymorphic_namespace_name, :multiple => multiple, :nullable => nullable, :polymorphic => polymorphic }
+          { name: name, return_type: self.polymorphic_namespace_name, multiple: multiple, nullable: nullable, polymorphic: polymorphic }
         end
       end
       

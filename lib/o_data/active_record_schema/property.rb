@@ -3,17 +3,17 @@ module OData
     class Property < OData::AbstractSchema::Property
       cattr_reader :column_adapter_return_types
       @@column_adapter_return_types = {
-        :binary    => 'Edm.Binary',
-        :boolean   => 'Edm.Boolean',
-        :byte      => 'Edm.Byte',
-        :date      => 'Edm.Date',
-        :datetime  => 'Edm.DateTime',
-        :float     => 'Edm.Decimal',
-        :integer   => 'Edm.Int32',
-        :string    => 'Edm.String',
-        :text      => 'Edm.String',
-        :timestamp => 'Edm.DateTime',
-        :time      => 'Edm.Time'
+        binary:    'Edm.Binary',
+        boolean:   'Edm.Boolean',
+        byte:      'Edm.Byte',
+        date:      'Edm.Date',
+        datetime:  'Edm.DateTime',
+        float:     'Edm.Decimal',
+        integer:   'Edm.Int32',
+        string:    'Edm.String',
+        text:      'Edm.String',
+        timestamp: 'Edm.DateTime',
+        time:      'Edm.Time'
       }.freeze
       
       def self.return_type_for(column_adapter)

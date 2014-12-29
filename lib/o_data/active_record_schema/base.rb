@@ -13,7 +13,7 @@ module OData
         ActiveRecord::Base.descendants.reject { |active_record|
           active_record == ActiveRecord::SchemaMigration          
         }.collect { |active_record|
-          self.EntityType(active_record, :reflect_on_associations => false)
+          self.EntityType(active_record, reflect_on_associations: false)
         }.collect { |entity_type| 
           entity_type.active_record.reflect_on_all_associations.each do |reflection|
             entity_type.NavigationProperty(reflection)

@@ -19,7 +19,7 @@ module ODataHelper
     xml.tag!(:feed, { "xml:base" => o_data_engine.service_url }.merge(options[:hide_xmlns] ? {} : @@o_data_atom_xmlns)) do
       xml.tag!(:title, results_title)
       xml.tag!(:id, results_url)
-      xml.tag!(:link, :rel => "self", :title => results_title, :href => results_href)
+      xml.tag!(:link, rel: "self", title: results_title, href: results_href)
 
       unless results.empty?
         if last_result = results.last
@@ -30,7 +30,7 @@ module ODataHelper
         end
         
         results.each do |result|
-          o_data_atom_entry(xml, query, result, options.merge(:hide_xmlns => true, :href => results_href))
+          o_data_atom_entry(xml, query, result, options.merge(hide_xmlns: true, href: results_href))
         end
       end
       
@@ -55,29 +55,29 @@ module ODataHelper
     
     xml.tag!(:entry, {}.merge(options[:hide_xmlns] ? {} : @@o_data_atom_xmlns)) do
       xml.tag!(:id, result_url) unless result_href.blank?     
-      xml.tag!(:title, result_title, :type => "text") unless result_title.blank?
-      xml.tag!(:summary, result_summary, :type => "text") unless result_summary.blank?
+      xml.tag!(:title, result_title, type: "text") unless result_title.blank?
+      xml.tag!(:summary, result_summary, type: "text") unless result_summary.blank?
       xml.tag!(:updated, result_updated_at.iso8601) unless result_updated_at.blank?
       
       xml.tag!(:author) do
         xml.tag!(:name)
       end
       
-      xml.tag!(:link, :rel => "edit", :title => result_title, :href => result_href) unless result_title.blank? || result_href.blank?
+      xml.tag!(:link, rel: "edit", title: result_title, href: result_href) unless result_title.blank? || result_href.blank?
       
       unless entity_type.navigation_properties.empty?
         entity_type.navigation_properties.sort_by(&:name).each do |navigation_property|
           navigation_property_href = result_href + '/' + navigation_property.name
           
-          navigation_property_attrs = { :rel => "http://schemas.microsoft.com/ado/2007/08/dataservices/related/" + navigation_property.name, :type => "application/atom+xml;type=#{navigation_property.to_end.multiple? ? 'feed' : 'entry'}", :title => navigation_property.name, :href => navigation_property_href }
+          navigation_property_attrs = { rel: "http://schemas.microsoft.com/ado/2007/08/dataservices/related/" + navigation_property.name, type: "application/atom+xml;type=#{navigation_property.to_end.multiple? ? 'feed' : 'entry'}", title: navigation_property.name, href: navigation_property_href }
           
           if (options[:expand] || {}).keys.include?(navigation_property)
             xml.tag!(:link, navigation_property_attrs) do
-              xml.m(:inline, :type => navigation_property_attrs[:type]) do
+              xml.m(:inline, type: navigation_property_attrs[:type]) do
                 if navigation_property.to_end.multiple?
-                  o_data_atom_feed(xml, query, navigation_property.find_all(result), options.merge(:entity_type => navigation_property.to_end.entity_type, :expand => options[:expand][navigation_property]))
+                  o_data_atom_feed(xml, query, navigation_property.find_all(result), options.merge(entity_type: navigation_property.to_end.entity_type, expand: options[:expand][navigation_property]))
                 else
-                  o_data_atom_entry(xml, query, navigation_property.find_one(result), options.merge(:entity_type => navigation_property.to_end.entity_type, :expand => options[:expand][navigation_property]))
+                  o_data_atom_entry(xml, query, navigation_property.find_one(result), options.merge(entity_type: navigation_property.to_end.entity_type, expand: options[:expand][navigation_property]))
                 end
               end
             end
@@ -87,10 +87,10 @@ module ODataHelper
         end
       end
       
-      xml.tag!(:category, :term => entity_type.qualified_name, :scheme => "http://schemas.microsoft.com/ado/2007/08/dataservices/scheme")
+      xml.tag!(:category, term: entity_type.qualified_name, scheme: "http://schemas.microsoft.com/ado/2007/08/dataservices/scheme")
       
       unless (properties = get_selected_properties_for(query, entity_type)).empty?
-        xml.tag!(:content, :type => "application/xml") do
+        xml.tag!(:content, type: "application/xml") do
           xml.m(:properties) do
             properties.each do |property|
               property_attrs = { "m:type" => property.return_type }
@@ -108,7 +108,7 @@ module ODataHelper
   end
 
   def o_data_json_feed(query, results, options = {})
-    results_json = results.collect { |result| o_data_json_entry(query, result, options.merge(:d => false, :deferred => false)) }
+    results_json = results.collect { |result| o_data_json_entry(query, result, options.merge(d: false, deferred: false)) }
     
     if inlinecount_option = query.options.find { |o| o.option_name == OData::Core::Options::InlinecountOption.option_name }
       if inlinecount_option.value == 'allpages'
@@ -161,9 +161,9 @@ module ODataHelper
             _json[navigation_property.name.to_s] = begin
               if (options[:expand] || {}).keys.include?(navigation_property)
                 if navigation_property.to_end.multiple?
-                  o_data_json_feed(query, navigation_property.find_all(result), options.merge(:entity_type => navigation_property.to_end.entity_type, :expand => options[:expand][navigation_property], :d => false))
+                  o_data_json_feed(query, navigation_property.find_all(result), options.merge(entity_type: navigation_property.to_end.entity_type, expand: options[:expand][navigation_property], d: false))
                 else
-                  o_data_json_entry(query, navigation_property.find_one(result), options.merge(:entity_type => navigation_property.to_end.entity_type, :expand => options[:expand][navigation_property], :d => false))
+                  o_data_json_entry(query, navigation_property.find_one(result), options.merge(entity_type: navigation_property.to_end.entity_type, expand: options[:expand][navigation_property], d: false))
                 end
               else
                 {

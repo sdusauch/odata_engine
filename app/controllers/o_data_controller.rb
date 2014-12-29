@@ -5,24 +5,24 @@ class ODataController < ApplicationController
   cattr_reader :parser
   @@parser = OData::Core::Parser.new(@@data_services).freeze
   
-  rescue_from OData::ODataException, :with => :handle_exception
-  rescue_from ActiveRecord::RecordNotFound, :with => :handle_exception
+  rescue_from OData::ODataException, with: :handle_exception
+  rescue_from ActiveRecord::RecordNotFound, with: :handle_exception
   
-  before_filter :extract_resource_path_and_query_string, :only => [:resource]
-  before_filter :parse_resource_path_and_query_string!,  :only => [:resource]
-  before_filter :set_request_format!,                    :only => [:resource]
+  before_filter :extract_resource_path_and_query_string, only: [:resource]
+  before_filter :parse_resource_path_and_query_string!,  only: [:resource]
+  before_filter :set_request_format!,                    only: [:resource]
   
   %w{service metadata resource}.each do |method_name|
     define_method(:"redirect_to_#{method_name}") do
       # redirect_to(send(:"o_data_#{method_name}_url"))
-      redirect_to(params.merge(:action => method_name.to_s))
+      redirect_to(params.merge(action: method_name.to_s))
     end
   end
   
   def service
     respond_to do |format|
       format.xml  # service.xml.builder
-      format.json { render :json => @@data_services.to_json }
+      format.json { render json: @@data_services.to_json }
     end
   end
   
@@ -39,22 +39,22 @@ class ODataController < ApplicationController
     
     case @last_segment.class.segment_name
     when OData::Core::Segments::CountSegment.segment_name
-      render :text => @results.to_i
+      render text: @results.to_i
     when OData::Core::Segments::LinksSegment.segment_name
       request.format = :xml unless request.format == :json
       
       respond_to do |format|
-        format.xml  { render :inline => "xml.instruct!; @results.empty? ? xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') { @results.each { |r| xml.uri(o_data_engine.resource_url(r[1])) } }", :type => :builder }
-        format.json { render :json => { "links" => @results.collect { |r| { "uri" => r } } }.to_json }
+        format.xml  { render inline: "xml.instruct!; @results.empty? ? xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.links('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') { @results.each { |r| xml.uri(o_data_engine.resource_url(r[1])) } }", type: :builder }
+        format.json { render json: { "links" => @results.collect { |r| { "uri" => r } } }.to_json }
       end
     when OData::Core::Segments::ValueSegment.segment_name
-      render :text => @results.to_s
+      render text: @results.to_s
     when OData::Core::Segments::PropertySegment.segment_name
       request.format = :xml unless request.format == :json
       
       respond_to do |format|
-        format.xml  { render :inline => "xml.instruct!; value.blank? ? xml.tag!(key.to_sym, 'm:null' => true, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:m' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.tag!(key.to_sym, value, 'edm:Type' => type, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:edm' => 'http://schemas.microsoft.com/ado/2007/05/edm')", :locals => { :key => @results.keys.first.name, :type => @results.keys.first.return_type, :value => @results.values.first }, :type => :builder }
-        format.json { render :json => { @results.keys.first.name => @results.values.first }.to_json }
+        format.xml  { render inline: "xml.instruct!; value.blank? ? xml.tag!(key.to_sym, 'm:null' => true, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:m' => 'http://schemas.microsoft.com/ado/2007/08/dataservices') : xml.tag!(key.to_sym, value, 'edm:Type' => type, 'xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices', 'xmlns:edm' => 'http://schemas.microsoft.com/ado/2007/05/edm')", locals: { key: @results.keys.first.name, type: @results.keys.first.return_type, value: @results.values.first }, type: :builder }
+        format.json { render json: { @results.keys.first.name => @results.values.first }.to_json }
       end
     when OData::Core::Segments::NavigationPropertySegment.segment_name
       @countable = @last_segment.countable?
@@ -136,7 +136,7 @@ class ODataController < ApplicationController
     request.format = :xml
     
     respond_to do |format|
-      format.xml { render :inline => "xml.instruct!; xml.error('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata') { xml.code(code.to_s); xml.message(message); xml.uri(uri) }", :type => :builder, :locals => { :code => nil, :message => ex.message, :uri => request.url } }
+      format.xml { render inline: "xml.instruct!; xml.error('xmlns' => 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata') { xml.code(code.to_s); xml.message(message); xml.uri(uri) }", type: :builder, locals: { code: nil, message: ex.message, uri: request.url } }
     end
   end
 end

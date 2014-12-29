@@ -10,7 +10,7 @@ module OData
       end
 
       def initialize(schema, entity_type, reflection)
-        super(schema, entity_type, self.class.name_for(reflection), self.class.association_for(schema, reflection), :source => true)
+        super(schema, entity_type, self.class.name_for(reflection), self.class.association_for(schema, reflection), source: true)
       end
 
       def method_name

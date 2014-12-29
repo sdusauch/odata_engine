@@ -1,11 +1,11 @@
 module OData
-	module ActiveRecordSchema
-	  module Serializable
+  module ActiveRecordSchema
+    module Serializable
       # def self.atom_method_names
       #   OData::AbstractSchema::Serializable.atom_element_names.collect { |atom_element_name| "o_data_atom_#{atom_element_name}_column" }
       # end
-	  end
-	end
+    end
+  end
 end
 
 OData::AbstractSchema::Serializable.atom_element_names.each do |atom_element_name|

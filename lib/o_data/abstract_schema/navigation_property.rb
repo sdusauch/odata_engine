@@ -10,7 +10,7 @@ module OData
         @entity_type = entity_type
         @association = association
 
-        options.reverse_merge!(:source => true)
+        options.reverse_merge!(source: true)
 
         if options[:source]
           @from_end = @association.from_end
